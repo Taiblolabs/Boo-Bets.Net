@@ -31,70 +31,39 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 1.5rem;
-  background-color: rgba(15, 23, 42, 0.8);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgba(100, 116, 139, 0.2);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  padding: 1rem 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .logo {
-  color: var(--primary);
-  font-size: 1.5rem;
-  font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 0.625rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  gap: 0.5rem;
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 600;
 }
 
 .logo-icon {
-  width: 2rem;
-  height: 2rem;
-  background-color: var(--primary);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  color: white;
-  font-size: 1.25rem;
+  color: #f97316;
+  font-size: 1.75rem;
 }
 
 .nav-menu {
   display: flex;
-  gap: 1.5rem;
+  gap: 2rem;
 }
 
 .nav-menu a {
-  color: var(--secondary);
+  color: #94a3b8;
   text-decoration: none;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  position: relative;
-  padding: 0.5rem 0;
+  transition: color 0.2s ease;
 }
 
 .nav-menu a:hover {
-  color: var(--light);
-}
-
-.nav-menu a::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background-color: var(--secondary);
-  transition: all 0.3s ease;
-}
-
-.nav-menu a:hover::after {
-  width: 100%;
+  color: #fff;
 }
 
 .auth-buttons {
@@ -103,49 +72,51 @@ body {
 }
 
 .btn {
-  padding: 0.625rem 1rem;
-  border-radius: 0.375rem;
-  border: none;
-  cursor: pointer;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
   font-weight: 600;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: none;
+  font-size: 1rem;
 }
 
 .btn-primary {
-  background-color: var(--primary);
+  background: #3b82f6;
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: var(--primary-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgba(147, 51, 234, 0.2);
+  background: #2563eb;
 }
 
-.btn-wallet {
-  background-color: var(--crypto);
+.btn-secondary {
+  background: #f97316;
   color: white;
 }
 
-.btn-wallet:hover {
-  background-color: var(--crypto-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.2);
+.btn-secondary:hover {
+  background: #ea580c;
 }
 
 .btn-outline {
-  background-color: transparent;
-  border: 1px solid var(--primary);
-  color: var(--light);
+  background: transparent;
+  border: 1px solid #3b82f6;
+  color: #3b82f6;
 }
 
 .btn-outline:hover {
-  background-color: rgba(147, 51, 234, 0.1);
-  transform: translateY(-2px);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.btn-wallet {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-wallet:hover {
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .main-content {
@@ -168,6 +139,18 @@ body {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 1rem;
+  padding: 2rem;
+  margin: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.section-title {
+  color: #fff;
+  font-size: 1.25rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
 }
 
 .crypto-info, .leaderboard-section {
@@ -179,28 +162,6 @@ body {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
 }
 
-.section-title {
-  color: var(--secondary);
-  text-align: center;
-  margin-bottom: 1.25rem;
-  font-size: 1.5rem;
-  font-weight: 700;
-  position: relative;
-  padding-bottom: 0.75rem;
-}
-
-.section-title::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4rem;
-  height: 3px;
-  background: linear-gradient(90deg, var(--secondary), var(--primary));
-  border-radius: 3px;
-}
-
 .leaderboard-content, .crypto-content {
   display: flex;
   flex-direction: column;
@@ -210,15 +171,7 @@ body {
 .crypto-balance {
   display: flex;
   justify-content: space-between;
-  padding: 0.75rem;
-  border-radius: 0.375rem;
-  background-color: rgba(255, 255, 255, 0.05);
-  transition: all 0.2s ease;
-}
-
-.crypto-balance:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  transform: translateY(-2px);
+  color: #94a3b8;
 }
 
 .game-title {
@@ -256,30 +209,30 @@ body {
 }
 
 .stake-options {
-  display: flex;
-  justify-content: center;
-  gap: 0.75rem;
-  margin: 1rem 0;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
 }
 
 .stake-option {
-  border: 1px solid var(--crypto);
-  border-radius: 0.375rem;
-  padding: 0.625rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.75rem;
+  border-radius: 0.5rem;
   cursor: pointer;
   transition: all 0.2s ease;
+  color: #94a3b8;
 }
 
 .stake-option:hover {
-  background-color: rgba(245, 158, 11, 0.1);
-  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
 }
 
 .stake-option.selected {
-  background-color: var(--crypto);
-  color: white;
-  font-weight: 600;
+  background: rgba(59, 130, 246, 0.3);
+  color: #fff;
+  border: 1px solid rgba(59, 130, 246, 0.5);
 }
 
 .upload-text {
@@ -431,47 +384,30 @@ body {
 }
 
 .modal {
-  display: none;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(2, 6, 23, 0.9);
-  z-index: 100;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
   justify-content: center;
   align-items: center;
-  backdrop-filter: blur(4px);
+  z-index: 1000;
 }
 
 .modal-content {
-  background-color: var(--dark);
-  border: 2px solid var(--secondary);
-  border-radius: 0.75rem;
+  background: #1f2937;
+  border-radius: 1rem;
   padding: 2rem;
   max-width: 500px;
   width: 90%;
-  text-align: center;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  animation: modalAppear 0.3s ease-out forwards;
-}
-
-@keyframes modalAppear {
-  from { 
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to { 
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .modal-title {
-  color: var(--primary);
-  margin-bottom: 1.25rem;
+  color: #fff;
   font-size: 1.5rem;
-  font-weight: 700;
+  margin-bottom: 1rem;
 }
 
 .modal-buttons {
@@ -482,14 +418,14 @@ body {
 }
 
 .wallet-options {
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
-  margin: 1.5rem 0;
-  flex-wrap: wrap;
+  margin: 2rem 0;
 }
 
 .wallet-option {
+  background: rgba(255, 255, 255, 0.05);
   display: flex;
   flex-direction: column;
   align-items: center;
