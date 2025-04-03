@@ -1,0 +1,11 @@
+open 82.25.72.132
+u366262974
+454799Wonka@
+binary
+cd /
+mkdir assets
+cd assets
+mput dist\assets\*
+cd ..
+mput dist\*
+quit

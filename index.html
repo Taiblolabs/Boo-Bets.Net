@@ -1,0 +1,1578 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRYPTO MEMORY GAME</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+  <!-- Web3.js -->
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
+  <!-- WalletConnect -->
+  <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
+  <!-- Coinbase Wallet SDK -->
+  <script src="https://unpkg.com/@coinbase/wallet-sdk@3.6.0/dist/index.js"></script>
+  <!-- Web3Modal -->
+  <script src="https://unpkg.com/web3modal@1.9.9/dist/index.js"></script>
+  <!-- QR Code Generator -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+  <style>
+      :root {
+        --primary: #9333ea;
+        --primary-dark: #7e22ce;
+        --secondary: #14b8a6;
+        --secondary-dark: #0f766e;
+        --crypto: #f59e0b;
+        --crypto-dark: #d97706;
+        --dark: #0f172a;
+        --darker: #020617;
+        --light: #f8fafc;
+        --gray: #64748b;
+      }
+      
+      * {
+      margin: 0;
+      padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+      
+      body {
+        background-color: var(--darker);
+        color: var(--light);
+        background-image: 
+          radial-gradient(circle at 20% 30%, rgba(147, 51, 234, 0.15) 0%, transparent 30%),
+          radial-gradient(circle at 80% 70%, rgba(20, 184, 166, 0.15) 0%, transparent 30%);
+        min-height: 100vh;
+      }
+      
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        background-color: rgba(15, 23, 42, 0.8);
+        backdrop-filter: blur(8px);
+        border-bottom: 1px solid rgba(100, 116, 139, 0.2);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      
+      .logo {
+        color: var(--primary);
+        font-size: 1.5rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      
+      .logo-icon {
+        width: 2rem;
+        height: 2rem;
+        background-color: var(--primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+      color: white;
+        font-size: 1.25rem;
+      }
+      
+      .nav-menu {
+      display: flex;
+        gap: 1.5rem;
+      }
+      
+      .nav-menu a {
+        color: var(--secondary);
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        position: relative;
+        padding: 0.5rem 0;
+      }
+      
+      .nav-menu a:hover {
+        color: var(--light);
+      }
+      
+      .nav-menu a::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background-color: var(--secondary);
+        transition: all 0.3s ease;
+      }
+      
+      .nav-menu a:hover::after {
+        width: 100%;
+      }
+      
+      .auth-buttons {
+        display: flex;
+        gap: 0.75rem;
+      }
+      
+      .btn {
+        padding: 0.625rem 1rem;
+        border-radius: 0.375rem;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        display: inline-flex;
+      align-items: center;
+      justify-content: center;
+        gap: 0.5rem;
+      }
+      
+      .btn-primary {
+        background-color: var(--primary);
+        color: white;
+      }
+      
+      .btn-primary:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px -1px rgba(147, 51, 234, 0.2);
+      }
+      
+      .btn-wallet {
+        background-color: var(--crypto);
+        color: white;
+      }
+      
+      .btn-wallet:hover {
+        background-color: var(--crypto-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.2);
+      }
+      
+      .btn-outline {
+        background-color: transparent;
+        border: 1px solid var(--primary);
+        color: var(--light);
+      }
+      
+      .btn-outline:hover {
+        background-color: rgba(147, 51, 234, 0.1);
+        transform: translateY(-2px);
+      }
+      
+      .main-content {
+        display: flex;
+        padding: 2rem 1.5rem;
+        gap: 2rem;
+        max-width: 1200px;
+      margin: 0 auto;
+        flex-wrap: wrap;
+      }
+      
+      .game-section {
+        flex: 3;
+        min-width: 300px;
+      }
+      
+      .side-panel {
+        flex: 1;
+        min-width: 300px;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+      }
+      
+      .crypto-info, .leaderboard-section {
+        border: 1px solid rgba(20, 184, 166, 0.3);
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        background-color: rgba(15, 23, 42, 0.7);
+        backdrop-filter: blur(8px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+      }
+      
+      .section-title {
+        color: var(--secondary);
+      text-align: center;
+        margin-bottom: 1.25rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+        position: relative;
+        padding-bottom: 0.75rem;
+      }
+      
+      .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 4rem;
+        height: 3px;
+        background: linear-gradient(90deg, var(--secondary), var(--primary));
+        border-radius: 3px;
+      }
+      
+      .leaderboard-content, .crypto-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      
+      .crypto-balance {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem;
+        border-radius: 0.375rem;
+        background-color: rgba(255, 255, 255, 0.05);
+        transition: all 0.2s ease;
+      }
+      
+      .crypto-balance:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+      }
+      
+      .game-title {
+        color: var(--primary);
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+        gap: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 800;
+      }
+      
+      .upload-section, .stake-section {
+        border: 1px solid rgba(100, 116, 139, 0.2);
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        background-color: rgba(15, 23, 42, 0.7);
+        backdrop-filter: blur(8px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+      }
+      
+      .stake-section {
+        border-color: rgba(245, 158, 11, 0.3);
+      }
+      
+      .stake-title {
+        color: var(--crypto);
+        margin-bottom: 1rem;
+        font-weight: 700;
+        font-size: 1.25rem;
+      }
+      
+      .stake-options {
+        display: flex;
+      justify-content: center;
+        gap: 0.75rem;
+        margin: 1rem 0;
+        flex-wrap: wrap;
+      }
+      
+      .stake-option {
+        border: 1px solid var(--crypto);
+        border-radius: 0.375rem;
+        padding: 0.625rem 1rem;
+      cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      
+      .stake-option:hover {
+        background-color: rgba(245, 158, 11, 0.1);
+        transform: translateY(-2px);
+      }
+      
+      .stake-option.selected {
+        background-color: var(--crypto);
+      color: white;
+        font-weight: 600;
+      }
+      
+      .upload-text {
+        color: var(--secondary);
+        margin-bottom: 1.25rem;
+        font-size: 1.125rem;
+      }
+      
+      .upload-buttons {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      
+      .game-stats {
+      display: flex;
+      justify-content: space-between;
+        align-items: center;
+        background-color: rgba(15, 23, 42, 0.7);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(20, 184, 166, 0.3);
+        border-radius: 0.5rem;
+        padding: 1rem 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+      }
+      
+      .timer {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: var(--secondary);
+        font-weight: 600;
+        font-size: 1.125rem;
+      }
+      
+      .timer-icon {
+        border: 2px solid var(--secondary);
+        border-radius: 50%;
+        width: 2rem;
+        height: 2rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1rem;
+      }
+      
+      .game-info {
+        color: var(--primary);
+        text-align: center;
+        font-weight: 600;
+        font-size: 1.125rem;
+      display: flex;
+      flex-direction: column;
+        gap: 0.25rem;
+    }
+
+      .action-buttons {
+      display: flex;
+        gap: 0.75rem;
+      }
+      
+      .btn-action {
+        background-color: var(--primary);
+        color: white;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 0.375rem;
+        display: flex;
+        justify-content: center;
+      align-items: center;
+        font-size: 1.25rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      
+      .btn-action:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px -1px rgba(147, 51, 234, 0.2);
+      }
+      
+      .game-board {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+      }
+      
+      @media (max-width: 640px) {
+        .game-board {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      
+      .game-card {
+        aspect-ratio: 1/1;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        border-radius: 0.5rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 2.5rem;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+      overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        transform-style: preserve-3d;
+      }
+      
+      .game-card:hover {
+        transform: scale(1.05) rotateY(10deg);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+      }
+      
+      .game-card.flipped {
+        transform: rotateY(180deg);
+      }
+      
+      .game-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: conic-gradient(
+          from 0deg at 50% 50%,
+          var(--crypto) 0deg,
+          transparent 60deg,
+          transparent 300deg,
+          var(--secondary) 360deg
+        );
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        animation: rotate 3s linear infinite;
+        z-index: -1;
+      }
+      
+      .game-card:hover::before {
+        opacity: 0.15;
+      }
+      
+      @keyframes rotate {
+        100% { transform: rotate(1turn); }
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(2, 6, 23, 0.9);
+      z-index: 100;
+      justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(4px);
+    }
+
+    .modal-content {
+        background-color: var(--dark);
+        border: 2px solid var(--secondary);
+        border-radius: 0.75rem;
+        padding: 2rem;
+      max-width: 500px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        animation: modalAppear 0.3s ease-out forwards;
+      }
+      
+      @keyframes modalAppear {
+        from { 
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to { 
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      .modal-title {
+        color: var(--primary);
+        margin-bottom: 1.25rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+      
+      .modal-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+      
+      .wallet-options {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin: 1.5rem 0;
+        flex-wrap: wrap;
+      }
+      
+      .wallet-option {
+      display: flex;
+        flex-direction: column;
+      align-items: center;
+        gap: 0.5rem;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        background-color: rgba(255, 255, 255, 0.05);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        width: 120px;
+      }
+      
+      .wallet-option:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        transform: translateY(-4px);
+      }
+      
+      .wallet-icon {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 0.5rem;
+      display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--light);
+        color: var(--dark);
+        font-weight: 700;
+        font-size: 1.25rem;
+      }
+      
+      .win-animation {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+        z-index: 50;
+        display: none;
+      }
+      
+      .confetti {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        opacity: 0.8;
+        border-radius: 2px;
+      }
+      
+      .player-row {
+        display: flex;
+        justify-content: space-between;
+        background-color: rgba(255, 255, 255, 0.05);
+        padding: 0.75rem;
+        border-radius: 0.375rem;
+        transition: all 0.2s ease;
+      }
+      
+      .player-row:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+      }
+      
+      .player-address {
+        color: var(--crypto);
+        font-size: 0.875rem;
+        font-family: monospace;
+      }
+      
+      .player-score {
+        color: var(--secondary);
+        font-weight: 700;
+      }
+      
+      .nft-badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        background-color: var(--primary);
+        color: white;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        margin-left: 0.5rem;
+        font-weight: 600;
+      }
+      
+      .reward-amount {
+        color: var(--crypto);
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0.75rem 0;
+      }
+      
+      .reward-tokens {
+        color: var(--secondary);
+        font-weight: 600;
+      }
+      
+      .reward-nft {
+        margin-top: 1rem;
+        padding: 0.75rem;
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--gray);
+    }
+    
+    .loading {
+      display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+        border-top-color: white;
+      animation: spin 1s linear infinite;
+        margin-right: 0.5rem;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+      .toast {
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        padding: 1rem;
+        background-color: var(--dark);
+        color: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        max-width: 24rem;
+        transform: translateY(100px);
+        opacity: 0;
+        transition: all 0.3s ease;
+      }
+      
+      .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      
+      .toast-icon {
+        width: 1.5rem;
+        height: 1.5rem;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+      }
+      
+      .toast-icon.success {
+        background-color: rgba(16, 185, 129, 0.2);
+        color: #10b981;
+      }
+      
+      .toast-icon.error {
+        background-color: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+      }
+      
+      .toast-icon.info {
+        background-color: rgba(59, 130, 246, 0.2);
+        color: #3b82f6;
+      }
+      
+      .toast-content {
+        flex-grow: 1;
+      }
+      
+      .toast-title {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+      }
+      
+      .toast-message {
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.8);
+      }
+      
+      /* Responsive design */
+      @media (max-width: 768px) {
+        .nav-menu {
+          display: none;
+        }
+        
+        .main-content {
+          flex-direction: column;
+        }
+        
+        .game-stats {
+          flex-direction: column;
+          gap: 1rem;
+        }
+        
+        .stake-options {
+          flex-direction: column;
+      align-items: center;
+        }
+        
+        .stake-option {
+          width: 100%;
+          max-width: 200px;
+        }
+      }
+    </style>
+    <style>
+        /* Estilos para el panel de apuestas */
+        .bet-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            background-color: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--primary);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .bet-badge {
+            width: 3rem;
+            height: 3rem;
+      border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .bet-badge.win {
+            background-color: rgba(16, 185, 129, 0.2);
+            border: 2px solid #10b981;
+        }
+        
+        .bet-badge.lose {
+            background-color: rgba(239, 68, 68, 0.2);
+            border: 2px solid #ef4444;
+        }
+        
+        .bet-details {
+            flex-grow: 1;
+        }
+        
+        .bet-amount {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .bet-result {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .result-win {
+            color: #10b981;
+            font-weight: 700;
+        }
+        
+        .result-lose {
+            color: #ef4444;
+            font-weight: 700;
+    }
+  </style>
+  </head>
+  <body>
+    <div id="app">
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">₿</div>
+                Cripto Memory
+        </div>
+            <div class="nav-menu">
+                <a href="#">Início</a>
+                <a href="#">Como Jogar</a>
+                <a href="#">Sobre</a>
+                <a href="#">Mercado NFT</a>
+        </div>
+            <div class="auth-buttons">
+                <button class="btn btn-wallet" id="wallet-btn">
+                    <span>Conectar Carteira</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M12.136.326A1.5 1.5 0 0 1 14 1.78V3h.5A1.5 1.5 0 0 1 16 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 13.5v-9a1.5 1.5 0 0 1 1.432-1.499L12.136.326zM5.562 3H13V1.78a.5.5 0 0 0-.621-.484L5.562 3zM1.5 4a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h13a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-13z"/>
+                    </svg>
+                </button>
+      </div>
+    </div>
+    
+        <div class="main-content">
+            <div class="game-section">
+                <h1 class="game-title">
+                    <div class="logo-icon">₿</div>
+                    Jogo da Memória Cripto
+                </h1>
+                
+                <!-- Mostrar información de apuesta si viene de Boo-Bets -->
+                <div id="bet-info" class="bet-info" style="display: none;">
+                    <div class="bet-badge"></div>
+                    <div class="bet-details">
+                        <div class="bet-amount">Aposta: <span id="bet-amount-value">0.00</span> ETH</div>
+                        <div class="bet-result">Resultado: <span id="bet-result-value">-</span></div>
+    </div>
+    </div>
+    
+                <div class="upload-section">
+                    <p class="upload-text">Carregue pelo menos 8 fotos ou selecione cartões NFT da sua carteira</p>
+                    <div class="upload-buttons">
+                        <button class="btn btn-primary" id="upload-photos-btn">Carregar Fotos</button>
+                        <button class="btn btn-outline" id="use-nfts-btn">Usar Meus NFTs</button>
+    </div>
+  </div>
+  
+                <div class="stake-section">
+                    <h3 class="stake-title">APOSTE PARA JOGAR</h3>
+                    <p>Faça uma aposta em cripto para jogar e ganhe recompensas por cada combinação!</p>
+                    
+                    <div class="stake-options">
+                        <div class="stake-option" data-value="0.001">0.001 ETH</div>
+                        <div class="stake-option" data-value="0.005">0.005 ETH</div>
+                        <div class="stake-option selected" data-value="0.01">0.01 ETH</div>
+                        <div class="stake-option" data-value="0.05">0.05 ETH</div>
+                    </div>
+                    
+                    <button class="btn btn-primary" id="stake-btn">Apostar & Jogar</button>
+      </div>
+      
+                <div class="game-stats">
+                    <div class="timer">
+                        <span class="timer-icon">⏱</span>
+                        <span id="time">00:00</span>
+          </div>
+                    
+                    <div class="game-info">
+                        <div>Jogadas: <span id="moves">0</span></div>
+                        <div>Combinações: <span id="matches">0/4</span></div>
+        </div>
+        
+                    <div class="action-buttons">
+                        <button class="btn-action" title="Reiniciar jogo" id="reset-btn">↺</button>
+                        <button class="btn-action" title="Compartilhar resultado" id="share-btn">↑</button>
+          </div>
+        </div>
+        
+                <div class="game-board" id="game-board">
+                    <!-- Las tarjetas se generarán dinámicamente aquí -->
+          </div>
+        </div>
+        
+            <div class="side-panel">
+                <div class="crypto-info">
+                    <h2 class="section-title">SUA CARTEIRA</h2>
+                    <div class="crypto-content">
+                        <div class="crypto-balance">
+                            <span>Saldo ETH:</span>
+                            <span id="eth-balance">-- ETH</span>
+          </div>
+                        <div class="crypto-balance">
+                            <span>Tokens do Jogo:</span>
+                            <span id="token-balance">-- GME</span>
+        </div>
+                        <div class="crypto-balance">
+                            <span>Cartões NFT:</span>
+                            <span id="nft-balance">-- Cartões</span>
+                        </div>
+                        <div class="crypto-balance">
+                            <span>Aposta Atual:</span>
+                            <span id="current-stake">-- ETH</span>
+                        </div>
+          </div>
+        </div>
+        
+                <div class="leaderboard-section">
+                    <h2 class="section-title">RANKING</h2>
+                    <div class="leaderboard-content" id="leaderboard">
+                        <div class="player-row">
+          <div>
+                                <span class="player-address">Conecte-se para ver o ranking</span>
+          </div>
+                            <span class="player-score">--</span>
+        </div>
+      </div>
+                </div>
+      </div>
+    </div>
+  </div>
+  
+    <!-- Modales -->
+    <div class="modal" id="wallet-modal">
+    <div class="modal-content">
+            <h2 class="modal-title">Conecte sua Carteira</h2>
+            <p>Escolha uma carteira para conectar e jogar:</p>
+            
+            <div class="wallet-options">
+                <div class="wallet-option" onclick="connectWallet('metamask')">
+                    <div class="wallet-icon">M</div>
+                    <span>MetaMask</span>
+        </div>
+                <div class="wallet-option" onclick="connectWallet('walletconnect')">
+                    <div class="wallet-icon">W</div>
+                    <span>WalletConnect</span>
+      </div>
+                <div class="wallet-option" onclick="connectWallet('coinbase')">
+                    <div class="wallet-icon">C</div>
+                    <span>Coinbase</span>
+                </div>
+      </div>
+      
+            <div class="modal-buttons">
+                <button class="btn btn-outline" onclick="closeModal('wallet-modal')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+  
+    <div class="modal" id="win-modal">
+    <div class="modal-content">
+            <h2 class="modal-title">Parabéns!</h2>
+            <p>Você completou o jogo em <span id="result-time">00:00</span> com <span id="result-moves">0</span> jogadas!</p>
+            
+            <div style="margin: 1.5rem 0;">
+                <p>Você ganhou:</p>
+                <div class="reward-amount"><span id="earned-eth">0.02</span> ETH</div>
+                <p class="reward-tokens">+<span id="earned-tokens">50</span> Tokens do Jogo</p>
+                
+                <div class="reward-nft">
+                    <p>Badge NFT será criado na sua carteira!</p>
+                </div>
+      </div>
+      
+            <div class="modal-buttons">
+                <button class="btn btn-outline" onclick="closeModal('win-modal')">Fechar</button>
+                <button class="btn btn-primary" onclick="playAgain()">Jogar Novamente</button>
+      </div>
+    </div>
+  </div>
+  
+    <div class="modal" id="nft-select-modal">
+    <div class="modal-content">
+            <h2 class="modal-title">Selecione seus NFTs</h2>
+            <p>Escolha pelo menos 4 NFTs para usar como cartas:</p>
+            
+            <div id="nft-gallery" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin: 1.5rem 0; max-height: 300px; overflow-y: auto;">
+                <!-- NFTs serão carregados aqui -->
+                <div style="display: flex; justify-content: center; width: 100%;">
+                    <div class="loading"></div>
+                </div>
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="btn btn-outline" onclick="closeModal('nft-select-modal')">Cancelar</button>
+                <button class="btn btn-primary" id="use-selected-nfts-btn">Usar Selecionados</button>
+      </div>
+    </div>
+  </div>
+
+    <div class="toast" id="toast">
+        <div class="toast-icon success">✓</div>
+        <div class="toast-content">
+            <div class="toast-title">Sucesso!</div>
+            <div class="toast-message">Operação concluída.</div>
+        </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script src="script.js"></script>
+  <script>
+        // Configuración del juego
+        const gameConfig = {
+            timeLimit: 120, // 2 minutos por defecto
+            pairCount: 8,  // 8 pares (16 cartas)
+            cardsPerRow: 4  // 4 cartas por fila
+        };
+        
+        // Verificar si hay datos de apuesta cuando se carga la página
+    document.addEventListener('DOMContentLoaded', function() {
+            // Cargar datos de apuesta desde localStorage (enviados por Boo-Bets)
+            const betAmount = localStorage.getItem('booBetsAmount');
+            const betResult = localStorage.getItem('booBetsResult');
+            const betAddress = localStorage.getItem('booBetsAddress');
+            const betTimestamp = localStorage.getItem('booBetsTimestamp');
+            
+            // También verificar los parámetros de URL por si vienen datos por ahí
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlBetAmount = urlParams.get('bet');
+            const urlBetResult = urlParams.get('result');
+            const fromBooBets = urlParams.get('from') === 'boo-bets';
+            
+            // Usar datos de URL si están disponibles, de lo contrario usar localStorage
+            const finalBetAmount = urlBetAmount || betAmount;
+            const finalBetResult = urlBetResult || betResult;
+            
+            // Verificar si los datos son válidos y son recientes (menos de 5 minutos)
+            const isDataRecent = betTimestamp && (Date.now() - parseInt(betTimestamp)) < 300000;
+            const isValidBet = finalBetAmount && parseFloat(finalBetAmount) > 0;
+            const isFromBooBets = fromBooBets || isDataRecent;
+            
+            // Si hay datos de apuesta válidos y recientes, mostrarlos
+            if (isValidBet && isFromBooBets) {
+                document.getElementById('bet-info').style.display = 'flex';
+                document.getElementById('bet-amount-value').textContent = finalBetAmount;
+                
+                const resultElement = document.getElementById('bet-result-value');
+                const betBadge = document.querySelector('.bet-badge');
+                
+                if (finalBetResult === 'win') {
+                    resultElement.textContent = 'Ganhou';
+                    resultElement.className = 'result-win';
+                    betBadge.innerHTML = '🏆';
+                    betBadge.className = 'bet-badge win';
+                    
+                    // Dar ventaja al jugador si ganó la apuesta
+                    gameConfig.timeLimit += 30; // 30 segundos extra
+                } else {
+                    resultElement.textContent = 'Perdeu';
+                    resultElement.className = 'result-lose';
+                    betBadge.innerHTML = '🎮';
+                    betBadge.className = 'bet-badge lose';
+                }
+                
+                // Actualizar el saldo en el panel lateral si hay dirección
+                if (betAddress) {
+                    // Simulación de billetera conectada
+                    const walletBtn = document.getElementById('wallet-btn');
+                    if (walletBtn) {
+                        const shortenedAddress = betAddress.substring(0, 6) + '...' + betAddress.substring(38);
+                        walletBtn.innerHTML = `<span>${shortenedAddress}</span>`;
+                    }
+                    
+                    // También actualizar información en el panel lateral
+                    const ethBalanceElement = document.getElementById('eth-balance');
+                    if (ethBalanceElement) {
+                        // Simular un saldo aleatorio entre 0.5 y 3 ETH
+                        const randomBalance = (Math.random() * 2.5 + 0.5).toFixed(4);
+                        ethBalanceElement.textContent = `${randomBalance} ETH`;
+                    }
+                }
+                
+                // También configurar la apuesta actual en el juego
+                const currentStakeElement = document.getElementById('current-stake');
+                if (currentStakeElement) {
+                    currentStakeElement.textContent = finalBetAmount + ' ETH';
+                }
+                
+                // Opciones de apuesta preseleccionada
+                const stakeOptions = document.querySelectorAll('.stake-option');
+                stakeOptions.forEach(option => {
+                    option.classList.remove('selected');
+                    if (option.getAttribute('data-value') === finalBetAmount) {
+                        option.classList.add('selected');
+                    }
+                });
+                
+                // Mostrar mensaje informativo
+                showToast('info', 'Dados da aposta carregados', 'Você pode começar a jogar agora!');
+                
+                // Limpiar localStorage para evitar problemas en recargas
+                setTimeout(() => {
+                    localStorage.removeItem('booBetsAmount');
+                    localStorage.removeItem('booBetsResult');
+                    localStorage.removeItem('booBetsAddress');
+                    localStorage.removeItem('booBetsTimestamp');
+                }, 3000);
+            }
+            
+            // Función para mostrar mensajes toast
+            function showToast(type, title, message) {
+                const toast = document.getElementById('toast');
+                if (!toast) return;
+                
+                const toastIcon = toast.querySelector('.toast-icon');
+                const toastTitle = toast.querySelector('.toast-title');
+                const toastMessage = toast.querySelector('.toast-message');
+                
+                // Definir tipo e ícono
+                toastIcon.className = 'toast-icon';
+                toastIcon.classList.add(type);
+                
+                if (type === 'success') {
+                    toastIcon.innerHTML = '✓';
+                } else if (type === 'error') {
+                    toastIcon.innerHTML = '✗';
+                } else if (type === 'info') {
+                    toastIcon.innerHTML = 'ℹ';
+                }
+                
+                // Definir conteúdo
+                toastTitle.textContent = title;
+                toastMessage.textContent = message;
+                
+                // Mostrar toast
+                toast.classList.add('show');
+                
+                // Esconder toast después de 3 segundos
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+        });
+        
+        // Manejador para el botón de apuesta en el juego
+        document.addEventListener('DOMContentLoaded', function() {
+            // Evento para las opciones de apuesta
+            const stakeOptions = document.querySelectorAll('.stake-option');
+            let selectedStakeAmount = "0.01"; // Valor por defecto
+            
+            stakeOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    stakeOptions.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedStakeAmount = this.getAttribute('data-value');
+                });
+            });
+            
+            // Evento para el botón de apostar & jugar
+            const stakeBtn = document.getElementById('stake-btn');
+            if (stakeBtn) {
+                stakeBtn.addEventListener('click', function() {
+                    // Verificar si ya hay una cartera conectada
+                    const walletBtn = document.getElementById('wallet-btn');
+                    const isWalletConnected = walletBtn && walletBtn.textContent.includes('...');
+                    
+                    if (!isWalletConnected) {
+                        // Abrir modal de conexión de cartera
+                        const walletModal = document.getElementById('wallet-modal');
+                        if (walletModal) walletModal.style.display = 'flex';
+                        showToast('info', 'Conecte sua carteira', 'Por favor, conecte sua carteira para continuar.');
+                        return;
+                    }
+                    
+                    // Simulación de procesamiento de apuesta
+                    stakeBtn.disabled = true;
+                    stakeBtn.innerHTML = '<div class="loading"></div> Processando...';
+                    
+                    setTimeout(() => {
+                        // Actualizar UI con la nueva apuesta
+                        const currentStakeEl = document.getElementById('current-stake');
+                        if (currentStakeEl) currentStakeEl.textContent = selectedStakeAmount + ' ETH';
+                        
+                        // Mostrar mensaje de éxito
+                        showToast('success', 'Aposta confirmada', `Aposta de ${selectedStakeAmount} ETH confirmada!`);
+                        
+                        // Ocultar sección de apuesta después del procesamiento
+                        const stakeSection = document.querySelector('.stake-section');
+                        if (stakeSection) {
+                            stakeSection.style.maxHeight = stakeSection.scrollHeight + 'px';
+                            setTimeout(() => {
+                                stakeSection.style.overflow = 'hidden';
+                                stakeSection.style.maxHeight = '0';
+                                stakeSection.style.padding = '0';
+                                stakeSection.style.margin = '0';
+                                stakeSection.style.opacity = '0';
+                                stakeSection.style.transition = 'all 0.5s ease';
+                            }, 100);
+                        }
+                        
+                        // Generar juego automáticamente para la demo
+                        setTimeout(() => {
+                            // Generar cartas si no existen
+                            const gameBoard = document.getElementById('game-board');
+                            if (gameBoard && gameBoard.children.length === 0) {
+                                generateDemoGame(gameBoard);
+                            }
+                        }, 1000);
+                        
+                        // Restablecer el botón
+                        stakeBtn.disabled = false;
+                        stakeBtn.innerHTML = 'Apostar & Jogar';
+                    }, 2000);
+                });
+            }
+            
+            // Función para generar un juego de demostración
+            function generateDemoGame(gameBoard) {
+                // Símbolos de criptomonedas para el juego
+                const cryptoSymbols = ['₿', 'Ξ', 'Ł', '₮', 'Ð', '₳', '₦', 'Ꜯ'];
+                const pairs = [...cryptoSymbols, ...cryptoSymbols];
+                
+                // Mezclar el array de pares
+                const shuffledPairs = pairs.sort(() => Math.random() - 0.5);
+                
+                // Generar HTML de las cartas
+                gameBoard.innerHTML = '';
+                
+                shuffledPairs.forEach((symbol, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'game-card';
+                    card.dataset.index = index;
+                    card.dataset.value = symbol;
+                    card.innerHTML = '?';
+                    
+                    // Añadir evento de clic para voltear la carta
+                    card.addEventListener('click', function() {
+                        if (card.classList.contains('flipped')) return;
+                        
+                        card.classList.add('flipped');
+                        card.innerHTML = symbol;
+                        
+                        // Lógica del juego (demo simplificada)
+                        const flippedCards = document.querySelectorAll('.game-card.flipped:not(.matched)');
+                        
+                        if (flippedCards.length === 2) {
+                            // Incrementar contador de movimientos
+                            const movesEl = document.getElementById('moves');
+                            if (movesEl) {
+                                const currentMoves = parseInt(movesEl.textContent) || 0;
+                                movesEl.textContent = currentMoves + 1;
+                            }
+                            
+                            // Verificar si hay coincidencia
+                            const [card1, card2] = flippedCards;
+                            
+                            if (card1.dataset.value === card2.dataset.value) {
+                                // Coincidencia
+                                setTimeout(() => {
+                                    card1.classList.add('matched');
+                                    card2.classList.add('matched');
+                                    
+                                    // Actualizar contador de coincidencias
+                                    const matchesEl = document.getElementById('matches');
+                                    if (matchesEl) {
+                                        const [current, total] = matchesEl.textContent.split('/');
+                                        const newCurrent = parseInt(current) + 1;
+                                        matchesEl.textContent = `${newCurrent}/${total}`;
+                                        
+                                        // Verificar si el juego ha terminado
+                                        if (newCurrent.toString() === total) {
+                                            // Mostrar modal de victoria
+                                            const winModal = document.getElementById('win-modal');
+                                            if (winModal) winModal.style.display = 'flex';
+                                        }
+                                    }
+                                }, 500);
+                            } else {
+                                // No hay coincidencia, voltear de nuevo
+                                setTimeout(() => {
+                                    flippedCards.forEach(c => {
+                                        c.classList.remove('flipped');
+                                        c.innerHTML = '?';
+                                    });
+                                }, 1000);
+                            }
+                        }
+                    });
+                    
+                    gameBoard.appendChild(card);
+                });
+                
+                // Iniciar el temporizador
+                startTimer();
+            }
+            
+            // Función para iniciar el temporizador
+            function startTimer() {
+                const timeEl = document.getElementById('time');
+                if (!timeEl) return;
+                
+                let seconds = 0;
+                const timer = setInterval(() => {
+                    seconds++;
+                    const mins = Math.floor(seconds / 60);
+                    const secs = seconds % 60;
+                    timeEl.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+                }, 1000);
+                
+                // Guardar la referencia del temporizador
+                window.gameTimer = timer;
+            }
+        });
+        
+        // Función para conectar la cartera
+        function connectWallet(walletType) {
+            // Simular una conexión de cartera para la demostración
+            const walletBtn = document.getElementById('wallet-btn');
+            const walletModal = document.getElementById('wallet-modal');
+            
+            // Mostrar animación de carga
+            walletBtn.innerHTML = '<div class="loading"></div> Conectando...';
+            
+            setTimeout(() => {
+                // Generar una dirección aleatoria
+                const randomAddress = '0x' + Array.from({length: 40}, () => 
+                    '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('');
+                
+                // Mostrar dirección truncada en el botón
+                const shortenedAddress = randomAddress.substring(0, 6) + '...' + randomAddress.substring(38);
+                walletBtn.innerHTML = `<span>${shortenedAddress}</span>`;
+                
+                // Actualizar información en el panel lateral
+                const ethBalanceElement = document.getElementById('eth-balance');
+                if (ethBalanceElement) {
+                    // Simular un saldo aleatorio entre 0.5 y 3 ETH
+                    const randomBalance = (Math.random() * 2.5 + 0.5).toFixed(4);
+                    ethBalanceElement.textContent = `${randomBalance} ETH`;
+                }
+                
+                const tokenBalanceElement = document.getElementById('token-balance');
+                if (tokenBalanceElement) {
+                    // Simular un saldo aleatorio entre 50 y 500 tokens
+                    const randomTokens = Math.floor(Math.random() * 450 + 50);
+                    tokenBalanceElement.textContent = `${randomTokens} GME`;
+                }
+                
+                const nftBalanceElement = document.getElementById('nft-balance');
+                if (nftBalanceElement) {
+                    // Simular un número aleatorio de NFTs entre 0 y 5
+                    const randomNFTs = Math.floor(Math.random() * 6);
+                    nftBalanceElement.textContent = `${randomNFTs} Cartões`;
+                }
+                
+                // Mostrar mensaje de éxito
+                showToast('success', 'Carteira conectada', `Conectado com ${walletType}!`);
+                
+                // Cerrar modal
+                closeModal('wallet-modal');
+                
+                // Actualizar el leaderboard con datos simulados
+                updateLeaderboard(randomAddress);
+            }, 1500);
+        }
+        
+        // Función para cerrar modales
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        // Función para actualizar el leaderboard con datos simulados
+        function updateLeaderboard(userAddress) {
+            const leaderboard = document.getElementById('leaderboard');
+            if (!leaderboard) return;
+            
+            // Limpiar el leaderboard actual
+            leaderboard.innerHTML = '';
+            
+            // Crear entradas simuladas para el ranking
+            const entries = [
+                { address: userAddress, score: Math.floor(Math.random() * 900 + 100), hasNFT: true },
+                { address: '0x7829af87d2b762c', score: 987, hasNFT: true },
+                { address: '0x29b784f2ed128ab', score: 854, hasNFT: false },
+                { address: '0x38a956fc210de4a', score: 721, hasNFT: true },
+                { address: '0x49c128ba98a5df3', score: 602, hasNFT: false }
+            ];
+            
+            // Ordenar por puntuación
+            entries.sort((a, b) => b.score - a.score);
+            
+            // Añadir al DOM
+            entries.forEach(entry => {
+                const row = document.createElement('div');
+                row.className = 'player-row';
+                
+                const shortenedAddress = entry.address.substring(0, 6) + '...' + entry.address.substring(entry.address.length - 4);
+                
+                row.innerHTML = `
+                    <div>
+                        <span class="player-address">${shortenedAddress}</span>
+                        ${entry.hasNFT ? '<span class="nft-badge">NFT</span>' : ''}
+                    </div>
+                    <span class="player-score">${entry.score}</span>
+                `;
+                
+                leaderboard.appendChild(row);
+            });
+        }
+        
+        // Función para jugar de nuevo
+        function playAgain() {
+            // Cerrar el modal de victoria
+            closeModal('win-modal');
+            
+            // Reiniciar el juego
+            const gameBoard = document.getElementById('game-board');
+            if (gameBoard) {
+                // Limpiar el tablero actual
+                gameBoard.innerHTML = '';
+                
+                // Reiniciar contadores
+                document.getElementById('moves').textContent = '0';
+                document.getElementById('matches').textContent = '0/4';
+                document.getElementById('time').textContent = '00:00';
+                
+                // Detener el temporizador anterior si existe
+                if (window.gameTimer) {
+                    clearInterval(window.gameTimer);
+                }
+                
+                // Generar un nuevo juego
+                generateDemoGame(gameBoard);
+            }
+        }
+        
+        // Función global para mostrar mensajes toast (disponible para todo el documento)
+        function showToast(type, title, message) {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            
+            const toastIcon = toast.querySelector('.toast-icon');
+            const toastTitle = toast.querySelector('.toast-title');
+            const toastMessage = toast.querySelector('.toast-message');
+            
+            // Definir tipo e ícono
+            toastIcon.className = 'toast-icon';
+            toastIcon.classList.add(type);
+            
+            if (type === 'success') {
+                toastIcon.innerHTML = '✓';
+            } else if (type === 'error') {
+                toastIcon.innerHTML = '✗';
+            } else if (type === 'info') {
+                toastIcon.innerHTML = 'ℹ';
+            }
+            
+            // Definir conteúdo
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+            
+            // Mostrar toast
+            toast.classList.add('show');
+            
+            // Esconder toast después de 3 segundos
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Función para generar un juego de demostración (disponible globalmente)
+        function generateDemoGame(gameBoard) {
+            // Símbolos de criptomonedas para el juego
+            const cryptoSymbols = ['₿', 'Ξ', 'Ł', '₮', 'Ð', '₳', '₦', 'Ꜯ'];
+            const pairs = [...cryptoSymbols, ...cryptoSymbols];
+            
+            // Mezclar el array de pares
+            const shuffledPairs = pairs.sort(() => Math.random() - 0.5);
+            
+            // Generar HTML de las cartas
+            gameBoard.innerHTML = '';
+            
+            shuffledPairs.forEach((symbol, index) => {
+                const card = document.createElement('div');
+                card.className = 'game-card';
+                card.dataset.index = index;
+                card.dataset.value = symbol;
+                card.innerHTML = '?';
+                
+                // Añadir evento de clic para voltear la carta
+                card.addEventListener('click', function() {
+                    if (card.classList.contains('flipped')) return;
+                    
+                    card.classList.add('flipped');
+                    card.innerHTML = symbol;
+                    
+                    // Lógica del juego (demo simplificada)
+                    const flippedCards = document.querySelectorAll('.game-card.flipped:not(.matched)');
+                    
+                    if (flippedCards.length === 2) {
+                        // Incrementar contador de movimientos
+                        const movesEl = document.getElementById('moves');
+                        if (movesEl) {
+                            const currentMoves = parseInt(movesEl.textContent) || 0;
+                            movesEl.textContent = currentMoves + 1;
+                        }
+                        
+                        // Verificar si hay coincidencia
+                        const [card1, card2] = flippedCards;
+                        
+                        if (card1.dataset.value === card2.dataset.value) {
+                            // Coincidencia
+                            setTimeout(() => {
+                                card1.classList.add('matched');
+                                card2.classList.add('matched');
+                                
+                                // Actualizar contador de coincidencias
+                                const matchesEl = document.getElementById('matches');
+                                if (matchesEl) {
+                                    const [current, total] = matchesEl.textContent.split('/');
+                                    const newCurrent = parseInt(current) + 1;
+                                    matchesEl.textContent = `${newCurrent}/${total}`;
+                                    
+                                    // Verificar si el juego ha terminado
+                                    if (newCurrent.toString() === total) {
+                                        // Actualizar el tiempo en el modal de victoria
+                                        const resultTimeEl = document.getElementById('result-time');
+                                        const resultMovesEl = document.getElementById('result-moves');
+                                        
+                                        if (resultTimeEl) {
+                                            resultTimeEl.textContent = document.getElementById('time').textContent;
+                                        }
+                                        
+                                        if (resultMovesEl) {
+                                            resultMovesEl.textContent = document.getElementById('moves').textContent;
+                                        }
+                                        
+                                        // Mostrar modal de victoria
+                                        const winModal = document.getElementById('win-modal');
+                                        if (winModal) {
+                                            // Simular recompensas basadas en el rendimiento del juego
+                                            const moves = parseInt(document.getElementById('moves').textContent) || 0;
+                                            const timeText = document.getElementById('time').textContent;
+                                            const [mins, secs] = timeText.split(':').map(num => parseInt(num));
+                                            const totalSeconds = mins * 60 + secs;
+                                            
+                                            // Mejor puntuación para menos movimientos y tiempo
+                                            let ethReward = 0.05;
+                                            if (moves < 10) ethReward += 0.02;
+                                            if (totalSeconds < 60) ethReward += 0.03;
+                                            
+                                            let tokenReward = 50;
+                                            if (moves < 12) tokenReward += 20;
+                                            if (totalSeconds < 90) tokenReward += 30;
+                                            
+                                            // Actualizar valores en el modal
+                                            document.getElementById('earned-eth').textContent = ethReward.toFixed(2);
+                                            document.getElementById('earned-tokens').textContent = tokenReward;
+                                            
+                                            // Mostrar modal
+                                            winModal.style.display = 'flex';
+                                        }
+                                    }
+                                }
+                            }, 500);
+                        } else {
+                            // No hay coincidencia, voltear de nuevo
+                            setTimeout(() => {
+                                flippedCards.forEach(c => {
+                                    c.classList.remove('flipped');
+                                    c.innerHTML = '?';
+                                });
+                            }, 1000);
+                        }
+                    }
+                });
+                
+                gameBoard.appendChild(card);
+            });
+            
+            // Iniciar el temporizador
+            startTimer();
+        }
+        
+        // Función para iniciar el temporizador
+        function startTimer() {
+            const timeEl = document.getElementById('time');
+            if (!timeEl) return;
+            
+            // Detener el temporizador anterior si existe
+            if (window.gameTimer) {
+                clearInterval(window.gameTimer);
+            }
+            
+            let seconds = 0;
+            const timer = setInterval(() => {
+                seconds++;
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                timeEl.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }, 1000);
+            
+            // Guardar la referencia del temporizador
+            window.gameTimer = timer;
+        }
+  </script>
+  </body>
+</html>

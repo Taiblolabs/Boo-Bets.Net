@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Memória</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #4a00e0, #8e2de2);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            text-align: center;
+            max-width: 800px;
+        }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 2rem auto;
+        }
+        .card {
+            background-color: #6c3eff;
+            height: 120px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: scale(1.05);
+        }
+        .btn {
+            background-color: white;
+            color: #5e35b1;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1.2rem;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Jogo da Memória</h1>
+        <p>Teste sua memória encontrando todos os pares de cartas iguais!</p>
+        
+        <div class="game-board">
+            <div class="card"></div>
+            <div class="card"></div>
+            <div class="card"></div>
+            <div class="card"></div>
+            <div class="card"></div>
+            <div class="card"></div>
+            <div class="card"></div>
+            <div class="card"></div>
+            <div class="card"></div>
+            <div class="card"></div>
+            <div class="card"></div>
+            <div class="card"></div>
+            <div class="card"></div>
+            <div class="card"></div>
+            <div class="card"></div>
+            <div class="card"></div>
+        </div>
+        
+        <button class="btn" id="start-btn">Começar a Jogar</button>
+        
+        <script>
+            document.getElementById('start-btn').addEventListener('click', function() {
+                alert('O jogo está sendo configurado! Em breve estará funcionando completamente.');
+            });
+            
+            // Adicionar emoji nas cartas para teste visual
+            const cards = document.querySelectorAll('.card');
+            const emojis = ['🍎', '🍌', '🍇', '🍓', '🍒', '🍍', '🥝', '🍉'];
+            const allEmojis = [...emojis, ...emojis]; // Duplicar para ter pares
+            
+            // Embaralhar
+            allEmojis.sort(() => Math.random() - 0.5);
+            
+            // Distribuir nas cartas
+            cards.forEach((card, index) => {
+                card.textContent = allEmojis[index];
+            });
+        </script>
+    </div>
+</body>
+</html> 
